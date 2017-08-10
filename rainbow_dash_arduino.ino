@@ -1,8 +1,10 @@
 #include <Dash.h>
 #include <Defs.h>
 
-int velocity=0;
+float v=0;
 char val;
+int prevMode=0;
+int mode=0; // Bluetooth
 
 void setup() {
   
@@ -12,27 +14,28 @@ void setup() {
   
 }
 
-void setVelocity(int value) {
-  
-  float targetVelocity=0;
-  
+void setv(int value) {
+    
   if(value==-1) {
-    if(velocity==1) targetVelocity=0; //if velocity == 1
-    else targetVelocity=-1;        //if velocity == 0 or -1
+    while (v > 0) {
+      v-=0.1;
+      drive_motor_duties(v,v,v,v,v,v);
+      //Serial.println(v);
+      delay(100);
+    }
+    
+    v=0;
+    
   } else { // if 1
-    if(velocity==-1) targetVelocity=0; // if velocity == -1
-    else targetVelocity=1;             // if velocity == 0 or 1
-  }
-  
-  while (targetVelocity < velocity) {
-    velocity-=0.1;
-    analogWrite(RMP_PWM, velocity);
-    delay(5);  
-  } 
-  while (targetVelocity >= velocity) {
-    velocity+=0.1;
-    analogWrite(RMP_PWM, velocity);
-    delay(5);
+    while (v < 1) {
+      v+=0.1;
+      drive_motor_duties(v,v,v,v,v,v);
+      //Serial.println(v);
+      delay(100);   
+    }
+    
+    v=1;
+    
   }
 }
 
@@ -42,13 +45,13 @@ void executeBluetooth(char val) {
    
      break;
   case '2': // UP
-     setVelocity(1);
+     setv(1);
      break;
    case '3': // RIGHT
    
      break;
   case '4': // DOWN
-     setVelocity(-1);
+     setv(-1);
      break;
    case '5':
    
@@ -56,18 +59,17 @@ void executeBluetooth(char val) {
   case '6':
    
      break;  
-   case '7':
+   case 's':
    
      break;
-  case '8':
+  case 't':
    
      break;  
      
-   case '9':
+   case 'x':
    
      break;
-  case '10':
-   
+  case 'c':
      break;
  } 
  
@@ -75,39 +77,27 @@ void executeBluetooth(char val) {
   
 }
 
-float value=0.5;
-  
 void loop() {
-  
   // Bluetooth
+  
   if (Serial.available()) {
     val=Serial.read();
     Serial.print(val);
     executeBluetooth(val);
   }
   
-  Serial.println("...");
   
-  value=0.5;
-  
-  int pwms[] = {LMP_PWM, LRP_PWM, LFP_PWM, RFP_PWM, RMP_PWM/*, RRP_PWM*/};
-  
-  int i=0;
-  for(i=0; i<6; i++) {
-   analogWrite(pwms[i], 150);
-   delay(1000);
-   
-   analogWrite(pwms[i], 0); 
-  }
-
-
-  //drive_motor_duties(val, val, val, val, val, val); 
-  //delay(1000);
-  //value=0;
-  //run_DCM_PUL(RMP,value);
-  
-  //drive_motor_duties(val, val, val, val, val, val); 
-  delay(1000);
-  
+  /*
+    switch(val) {
+      case '6':
+        if (mode!=0) {
+          prevMode=mode;
+          mode=0;
+        }
+        else mode=prevMode;
+        break;
+    }
+    if(mode==0) executeBluetooth(val);
+  }*/
 }
 

@@ -219,7 +219,7 @@ void drive_motor_duties(float rf_d, float lf_d, float lm_d, float lr_d, float rr
 	wheel_pwm(LRP,rf_d);
 	wheel_pwm(LMP,lm_d);
 	wheel_pwm(RMP,rm_d);
-	wheel_pwm(LRP,lr_d);
+	wheel_pwm(RFP,lr_d);
 	wheel_pwm(RRP,rr_d);
 	delay(5);
 }
