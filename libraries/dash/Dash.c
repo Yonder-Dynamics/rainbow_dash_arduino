@@ -9,8 +9,8 @@ float mapfun(float x, float inMIN, float inMAX, float outMIN, float outMAX) {
 /**
 INITIALIZATION
 **/
-void initialize_GPIO(){
-
+int initialize_GPIO(){
+/*
 	int i=0;
 
   // OUTPUTS
@@ -39,16 +39,88 @@ void initialize_GPIO(){
 	for(i=0; i<input_c; i++) pinMode(input[i], INPUT);
 
   // SLEEP PINS
-	sleep_pins(HIGH);
-
+	//Serial.println("[SETUP] GPIO Initialized.");
 	delay(5);
+	*/
+	// DIGITAL PINS
+	pinMode(LFP_DIR, OUTPUT);
+	pinMode(LMP_DIR, OUTPUT);
+	pinMode(LRP_DIR, OUTPUT);
+	pinMode(RFP_DIR, OUTPUT);
+	pinMode(RMP_DIR, OUTPUT);
+	pinMode(RRP_DIR, OUTPUT);
+	pinMode(LFS_IN1, OUTPUT);
+	pinMode(LFS_IN2, OUTPUT);
+	pinMode(LRS_IN3, OUTPUT);
+	pinMode(LRS_IN4, OUTPUT);
+	pinMode(RFS_IN1, OUTPUT);
+	pinMode(RFS_IN2, OUTPUT);
+	pinMode(RRS_IN3, OUTPUT);
+	pinMode(RRS_IN4, OUTPUT);
+	pinMode(SLEEP1, OUTPUT);
+	pinMode(SLEEP2, OUTPUT);
+	pinMode(SLEEP3, OUTPUT);
+	pinMode(SLEEP4, OUTPUT);
+	pinMode(SLEEP5, OUTPUT);
+	pinMode(SLEEP6, OUTPUT);
 
+	pinMode(ENA_BR, OUTPUT);
+	pinMode(SMP_IN1, OUTPUT);
+	pinMode(SMP_IN2, OUTPUT);
+	pinMode(CLA_IN3, OUTPUT);
+	pinMode(CLA_IN4, OUTPUT);
+	pinMode(FOR_DIR, OUTPUT);
+	pinMode(FOR_PUL, OUTPUT);
+	pinMode(ELB_DIR, OUTPUT);
+	pinMode(ELB_PUL, OUTPUT);
+	pinMode(BAS_DIR, OUTPUT);
+	pinMode(BAS_PUL, OUTPUT);
+	pinMode(BR_DIR, OUTPUT);
+	pinMode(BR_PUL, OUTPUT);
+	pinMode(WRI_DIR, OUTPUT);
+	pinMode(WRI_PUL, OUTPUT);
+	pinMode(EMACT, OUTPUT);
+	pinMode(ENA_WRI, OUTPUT);
+
+	/// INTERRUPT PINS
+	pinMode(BLSL, INPUT);
+	pinMode(BLSR, INPUT);
+	pinMode(CLST, INPUT);
+	pinMode(CLSB, INPUT);
+	pinMode(SLS, INPUT);
+	pinMode(FTE, INPUT); // 5TE?
+
+
+	// PWM PINS
+	pinMode(LFP_PWM, OUTPUT);
+	pinMode(LMP_PWM, OUTPUT);
+	pinMode(LRP_PWM, OUTPUT);
+	pinMode(RFP_PWM, OUTPUT);
+	pinMode(RMP_PWM, OUTPUT);
+	pinMode(RRP_PWM, OUTPUT);
+
+	// ANALOG PINS
+	pinMode(LFS_POT, INPUT);
+	pinMode(LRS_POT, INPUT);
+	pinMode(RFS_POT, INPUT);
+	pinMode(RRS_POT, INPUT);
+	pinMode(FOR_POT, INPUT);
+	pinMode(ELB_POT, INPUT);
+	pinMode(BAS_POT, INPUT);
+	//pinMode(BR_POT, INPUT);
+	pinMode(BATT_VOLT, INPUT);
+
+  delay(5);
+  return 1;
 }
 
-void sleep_pins(int val) {
-	int i=0;
-	int sleeps[6]={SLEEP1, SLEEP2, SLEEP3, SLEEP4, SLEEP5, SLEEP6};
-	for(i=0; i < 6; i++) digitalWrite(sleeps[i], val);
+int sleep_pins(int i) {
+	digitalWrite(SLEEP1, i);
+	digitalWrite(SLEEP2, i);
+	digitalWrite(SLEEP3, i);
+	digitalWrite(SLEEP4, i);
+	digitalWrite(SLEEP5, i);
+	digitalWrite(SLEEP6, i);
 }
 
 /**
@@ -66,9 +138,12 @@ int systemwide_disable() {
 
 int systemwide_enable() {
 	sleep_pins(HIGH);
-	delay(5);
 	drive_enable();
+	delay(5);
+
+  //Serial.println("[SETUP] Systemwide enabled.")
   //cstate.rover_state=drive_enable() && enable_arm() && enable_steppers();
+	cstate.rover_state=1;
 	return cstate.rover_state;
 }
 
@@ -102,8 +177,8 @@ int drive_disable() {
 int drive_enable(){
 	//printf("Initializing the Drive System!\n");
 	cstate.drive_state = ARMED;
-	drive_halt();
-	drive_allwheels_dir(1);
+	//drive_halt();
+	//drive_allwheels_dir(1);
 	//cstate.LMP_encoder = 0;
 	//cstate.RMP_encoder = 0;
 	return 1;
@@ -116,7 +191,7 @@ void wheel_dir(Motor MOT, int in) {
 }
 
 void wheel_pwm(Motor MOT, float duty) {
-	if(duty<0) wheel_dir(MOT,0);
+	//if(duty<0) wheel_dir(MOT,0);
 	analogWrite(MOT.PULSE, abs(duty)*255);
 	delay(5);
 }

@@ -12,6 +12,7 @@
 #include <assert.h>
 #include "Defs.h"
 #include "Arduino.h"
+
 //#include <Wire.h>s
 //#include "FTE.h"
 //#include <Servo.h>
@@ -48,14 +49,14 @@ const Motor BR     = {lBR, STEP, ENA_BR, BR_DIR, BR_PUL, SPDBR, 0, 0};	// TB - B
 const Motor WRI    = {lWRI, STEP, ENA_WRI, WRI_DIR, WRI_PUL, SPDWRI, 0, 0};	// TB - Wrist Rotation:		DIR P8.07 | PUL P8.09
 const Motor CLA    = {lCLA, CLAMP, 0, 0, 0, 0, CLA_IN3, CLA_IN4};	// L2 - Hand Clamp:			DIR P8.16 | PUL P8.18
 const Motor ELMAG  = {lELMAG, EMAG, 0, 0, EMACT, 0, 0, 0};		// SW - Electromagnet:		ACT P8.19
-
+/*
 int wristCount;
 int baseRotCount;
-
+*/
 
 /** INITIALIZE **/
-void initialize_GPIO();
-void sleep_pins(int i);
+int initialize_GPIO();
+int sleep_pins(int i);
 int systemwide_enable();             // arm rover for motion
 int systemwide_disable();
 int systemwide_reset();
