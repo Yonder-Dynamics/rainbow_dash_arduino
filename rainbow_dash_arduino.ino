@@ -4,7 +4,6 @@
 #include <std_msgs/Float32MultiArray.h>
 #include <std_msgs/Float32.h>
 
-
 float duty_prev=0;
 float duty=0;
 float v=0;
@@ -12,8 +11,6 @@ char val;
 int prevMode=0;
 int mode=0; // Bluetooth
 std_msgs::Float32MultiArray test;
-
-
 
 void manualCallback(const std_msgs::Float32& msg) { 
   //lr=msg.data[0];
@@ -29,12 +26,9 @@ ros::Publisher pubby("MEGAMIND", &test);
 void setup() {
   
   Serial.begin(57600);
-  //Serial.println(
-    initialize_GPIO();
-  //);
-  //Serial.println(
-    systemwide_enable();
-  //);
+  Serial2.begin(57600);
+  Serial.println(initialize_GPIO());
+  Serial.println(systemwide_enable());
   
   nh.initNode();
   nh.advertise(pubby);
@@ -46,7 +40,7 @@ void setv(int value) {
     while (v > 0) {
       v-=0.1;
       drive_motor_duties(v,v,v,v,v,v);
-      //Serial.println(v);
+      Serial.println(v);
       delay(100);
     }
     
@@ -56,7 +50,7 @@ void setv(int value) {
     while (v < 1) {
       v+=0.1;
       drive_motor_duties(v,v,v,v,v,v);
-      //Serial.println(v);
+      Serial.println(v);
       delay(100);   
     }
     
@@ -105,16 +99,16 @@ void executeBluetooth(char val) {
 
 void loop() {
   // Bluetooth
-  /*
-  if (Serial.available()) {
-    val=Serial.read();
+  
+  if (Serial2.available()) {
+    val=Serial2.read();
     Serial.print(val);
     executeBluetooth(val);
-  }  */
+  }
   
   if (duty!=duty_prev) {
     pubby.publish(&test); 
-    Serial.println("hey");
+    //Serial.println("hey");
     duty_prev=duty;
   }
   nh.spinOnce();
