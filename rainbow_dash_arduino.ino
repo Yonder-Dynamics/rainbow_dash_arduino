@@ -1,17 +1,43 @@
 #include <Dash.h>
 #include <Defs.h>
+#include <ros.h>
+#include <std_msgs/Float32MultiArray.h>
+#include <std_msgs/Float32.h>
 
+
+float duty_prev=0;
+float duty=0;
 float v=0;
 char val;
 int prevMode=0;
 int mode=0; // Bluetooth
+std_msgs::Float32MultiArray test;
+
+
+
+void manualCallback(const std_msgs::Float32& msg) { 
+  //lr=msg.data[0];
+  duty=msg.data;
+  test.data[0]=msg.data; 
+  drive_motor_duties(duty,duty,duty,duty,duty,duty);
+}
+
+ros::NodeHandle nh;
+ros::Subscriber<std_msgs::Float32> subby("UpDown", &manualCallback);
+ros::Publisher pubby("MEGAMIND", &test);
 
 void setup() {
   
-  Serial.begin(9600);
-  Serial.println(initialize_GPIO());
-  Serial.println(systemwide_enable());
+  Serial.begin(57600);
+  //Serial.println(
+    initialize_GPIO();
+  //);
+  //Serial.println(
+    systemwide_enable();
+  //);
   
+  nh.initNode();
+  nh.advertise(pubby);
 }
 
 void setv(int value) {
@@ -79,25 +105,20 @@ void executeBluetooth(char val) {
 
 void loop() {
   // Bluetooth
-  
+  /*
   if (Serial.available()) {
     val=Serial.read();
     Serial.print(val);
     executeBluetooth(val);
+  }  */
+  
+  if (duty!=duty_prev) {
+    pubby.publish(&test); 
+    Serial.println("hey");
+    duty_prev=duty;
   }
+  nh.spinOnce();
+  delay(10);  
   
-  
-  /*
-    switch(val) {
-      case '6':
-        if (mode!=0) {
-          prevMode=mode;
-          mode=0;
-        }
-        else mode=prevMode;
-        break;
-    }
-    if(mode==0) executeBluetooth(val);
-  }*/
 }
 

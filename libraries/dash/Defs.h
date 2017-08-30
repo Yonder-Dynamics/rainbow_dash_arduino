@@ -33,11 +33,11 @@ MEGA PINOUTS
 #define RRS_IN3	34
 #define RRS_IN4	35
 
-#define SLEEP1 A9
-#define SLEEP2 A10
-#define SLEEP3 A11
-#define SLEEP4 A12
-#define SLEEP5 A13
+#define SLEEP1 63
+#define SLEEP2 64
+#define SLEEP3 65
+#define SLEEP4 66
+#define SLEEP5 67
 #define SLEEP6  36
 
 
@@ -70,17 +70,17 @@ MEGA PINOUTS
 #define FTE	21
 
 //Swerve Pots
-#define LFS_POT	A0
-#define LRS_POT	A1
-#define RFS_POT	A3
-#define RRS_POT	A2
+#define LFS_POT	54
+#define LRS_POT	55
+#define RFS_POT	57
+#define RRS_POT	56
 
 //Arm Pots
-#define FOR_POT	A4
-#define ELB_POT	A5
-#define BAS_POT	A6
-#define BR_POT	A7
-#define BATT_VOLT	A8
+#define FOR_POT	58
+#define ELB_POT	59
+#define BAS_POT	60
+#define BR_POT	61
+#define BATT_VOLT	62
 
 /**
 LABELS
