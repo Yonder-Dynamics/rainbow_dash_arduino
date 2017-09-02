@@ -1,37 +1,47 @@
 #include <Dash.h>
 #include <Defs.h>
 #include <ros.h>
-#include <std_msgs/Float32MultiArray.h>
 #include <std_msgs/Float32.h>
+#include <std_msgs/Float32MultiArray.h>
+
 
 float duty_prev=0;
 float duty=0;
+float lr=0;
 float v=0;
 char val;
 int prevMode=0;
 int mode=0; // Bluetooth
-std_msgs::Float32MultiArray test;
+std_msgs::Float32MultiArray value;
+ros::Publisher pubby("MEGA", &value);
 
-void manualCallback(const std_msgs::Float32& msg) { 
-  //lr=msg.data[0];
-  duty=msg.data;
-  test.data[0]=msg.data; 
+void manualCallback(const std_msgs::Float32MultiArray& msg) { 
+  
+  lr=msg.data[3];
+  duty=msg.data[4];
+  value.data=msg.data;
+  pubby.publish(&value); 
+
   drive_motor_duties(duty,duty,duty,duty,duty,duty);
+  delay(10);
 }
 
 ros::NodeHandle nh;
-ros::Subscriber<std_msgs::Float32> subby("UpDown", &manualCallback);
-ros::Publisher pubby("MEGAMIND", &test);
+ros::Subscriber<std_msgs::Float32MultiArray> subby("manual_guidance", &manualCallback);
+
 
 void setup() {
   
-  Serial.begin(57600);
-  Serial2.begin(57600);
-  Serial.println(initialize_GPIO());
-  Serial.println(systemwide_enable());
+  //Serial.begin(57600);
+  //Serial2.begin(57600);
+  //Serial.println(
+  initialize_GPIO();//);
+  //Serial.println(
+  systemwide_enable();//);
   
   nh.initNode();
   nh.advertise(pubby);
+  nh.subscribe(subby);
 }
 
 void setv(int value) {
@@ -99,15 +109,14 @@ void executeBluetooth(char val) {
 
 void loop() {
   // Bluetooth
-  
+  /*
   if (Serial2.available()) {
     val=Serial2.read();
     Serial.print(val);
     executeBluetooth(val);
-  }
+  }*/
   
   if (duty!=duty_prev) {
-    pubby.publish(&test); 
     //Serial.println("hey");
     duty_prev=duty;
   }
