@@ -3,49 +3,64 @@
 #include <ros.h>
 #include <std_msgs/Float32.h>
 #include <std_msgs/Float32MultiArray.h>
+#include <SoftwareSerial.h>
 
+#define MAX_DUTY 0.5
 
-float duty_prev=0;
+std_msgs::Float32MultiArray value;
+
+// Set up publisher
+ros::Publisher pubby("MEGA", &value);
+ros::NodeHandle nh;
+
+float theta;
 float duty=0;
 float lr=0;
-float v=0;
+float ud=0;
+
+
+float v=0, head=0;
 char val;
-int prevMode=0;
-int mode=0; // Bluetooth
-std_msgs::Float32MultiArray value;
-ros::Publisher pubby("MEGA", &value);
 
 void manualCallback(const std_msgs::Float32MultiArray& msg) { 
   
   lr=msg.data[3];
   duty=msg.data[4];
+  /*
+  theta=atan(ud/lr);
+  duty=cos(theta)*ud;*/
+  
+  if (duty > MAX_DUTY) duty=MAX_DUTY;
+  else if (duty < -MAX_DUTY) duty=-MAX_DUTY;
   value.data=msg.data;
   pubby.publish(&value); 
 
   drive_motor_duties(duty,duty,duty,duty,duty,duty);
   delay(10);
-}
+} //manualCallback
 
-ros::NodeHandle nh;
+// Set up subscriber
 ros::Subscriber<std_msgs::Float32MultiArray> subby("manual_guidance", &manualCallback);
-
 
 void setup() {
   
-  //Serial.begin(57600);
-  //Serial2.begin(57600);
-  //Serial.println(
-  initialize_GPIO();//);
-  //Serial.println(
-  systemwide_enable();//);
+  Serial.begin(57600);
+  Serial.println("Setup complete.");
   
+  // Rover initialization
+  initialize_GPIO();
+  systemwide_enable();
+  
+  // ROS Initialization
   nh.initNode();
   nh.advertise(pubby);
   nh.subscribe(subby);
-}
+  
+  Serial2.begin(9600);
+} //setup
 
 void setv(int value) {
-    
+   /* 
   if(value==-1) {
     while (v > 0) {
       v-=0.1;
@@ -53,34 +68,46 @@ void setv(int value) {
       Serial.println(v);
       delay(100);
     }
-    
     v=0;
+    drive_motor_duties(v,v,v,v,v,v);
+
     
-  } else { // if 1
-    while (v < 1) {
-      v+=0.1;
-      drive_motor_duties(v,v,v,v,v,v);
-      Serial.println(v);
-      delay(100);   
+  }*/
+  if(value==1) {
+    while (v > -MAX_DUTY) {
+        v-=0.1;
+        drive_motor_duties(v,v,v,v,v,v);
+        Serial.println(v);
+        delay(100);   
     }
-    
-    v=1;
-    
+         
+    v=-MAX_DUTY;
+    drive_motor_duties(v,v,v,v,v,v);
+  } else if(value==-1) {
+    while (v < -0.1) {
+        v+=0.1;
+        drive_motor_duties(v,v,v,v,v,v);
+        Serial.println(v);
+        delay(100);   
+    }
+         
+    v=0;
+    drive_motor_duties(v,v,v,v,v,v);
   }
-}
+  
+} //setv
 
 void executeBluetooth(char val) {
  switch (val) {
-   case '1': // LEFT
-   
+   case 'l': // LEFT
      break;
-  case '2': // UP
+  case 'u': // UP
+   
      setv(1);
      break;
-   case '3': // RIGHT
-   
+   case 'r': // RIGHT
      break;
-  case '4': // DOWN
+  case 'd': // DOWN
      setv(-1);
      break;
    case '5':
@@ -101,27 +128,21 @@ void executeBluetooth(char val) {
      break;
   case 'c':
      break;
- } 
- 
- 
-  
-}
+ }  
+} // executeBluetooth
 
 void loop() {
-  // Bluetooth
-  /*
+  Serial.flush();
+  Serial2.flush();
+  // Bluetooth  
   if (Serial2.available()) {
     val=Serial2.read();
-    Serial.print(val);
+    Serial.write(val);
     executeBluetooth(val);
-  }*/
-  
-  if (duty!=duty_prev) {
-    //Serial.println("hey");
-    duty_prev=duty;
   }
-  nh.spinOnce();
-  delay(10);  
   
-}
+  nh.spinOnce();
+  delay(5);  
+  
+} // loop
 
