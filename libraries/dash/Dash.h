@@ -66,6 +66,11 @@ int drive_reset();
 void wheel_dir(Motor MOT, int in);
 void wheel_pwm(Motor MOT, float duty);
 
+void arm_motor_duties(int b, int e, int f);
+void arm_pwm(Motor MOT, int duty);
+
+void arm_base_rotate(int duty);
+
 void drive_halt();
 void drive_motor_duties(float rf_d, float lf_d, float lm_d, float lr_d, float rr_d, float rm_d);
 

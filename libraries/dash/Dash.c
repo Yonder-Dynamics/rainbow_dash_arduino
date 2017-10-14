@@ -222,12 +222,28 @@ void arm_motor_duties(int bas_d, int elb_d, int for_d) {
 
 void arm_pwm(Motor MOT, int duty) {
 	int DIR;
+
 	DIR=(duty >= 0) ? HIGH : LOW;
 	digitalWrite(MOT.DIR, DIR);
 	delay(5);
 	//duty = (duty > 0) ? HIGH : LOW;
 	digitalWrite(MOT.PULSE, abs(duty));
-	s
+	delay(5);
+}
+
+void base_pwm(Motor MOT, int duty) {
+	int DIR;
+
+	DIR=(duty >= 0) ? HIGH : LOW;
+	digitalWrite(MOT.DIR, DIR);
+	delay(5);
+	//duty = (duty > 0) ? HIGH : LOW;
+	digitalWrite(MOT.PULSE, abs(duty));
+	delay(5);
+}
+
+void arm_base_rotate(int duty) {
+	base_pwm(BR, duty);
 	delay(5);
 }
 
