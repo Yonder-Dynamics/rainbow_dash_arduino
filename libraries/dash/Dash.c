@@ -213,6 +213,24 @@ void drive_motor_duties(float rf_d, float lf_d, float lm_d, float lr_d, float rr
 	delay(5);
 }
 
+void arm_motor_duties(int bas_d, int elb_d, int for_d) {
+	arm_pwm(BAS, bas_d);
+	arm_pwm(ELB, elb_d);
+	arm_pwm(FOR, for_d);
+	delay(5);
+}
+
+void arm_pwm(Motor MOT, int duty) {
+	int DIR;
+	DIR=(duty >= 0) ? HIGH : LOW;
+	digitalWrite(MOT.DIR, DIR);
+	delay(5);
+	//duty = (duty > 0) ? HIGH : LOW;
+	digitalWrite(MOT.PULSE, abs(duty));
+	s
+	delay(5);
+}
+
 void print_state_message() {
 
   char msg[1000];

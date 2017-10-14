@@ -4,8 +4,9 @@
 #include <std_msgs/Float32.h>
 #include <std_msgs/Float32MultiArray.h>
 #include <SoftwareSerial.h>
+#include <Stepper.h>
 #define COEF 0.5
-#define MAX_DUTY 0.5
+#define MAX_DUTY 0.25
 
 std_msgs::Float32MultiArray value;
 
@@ -13,14 +14,26 @@ std_msgs::Float32MultiArray value;
 ros::Publisher pubby("MEGA", &value);
 ros::NodeHandle nh;
 
+Stepper stepp(200, BR_DIR, BR_PUL);
+
+
 float theta;
 unsigned changeFlag;
 
 /* Speed */
 float duty=0;
-
 float lr=0;
 float ud=0;
+
+/** Part of the arm being controlled. 
+0 = Base
+1 = Elbow
+2 = Forearm
+*/
+int arm_segment=0;
+int arm_duty=0;
+
+int arm_base_duty=0;
 
 /** Coefficients of speed */
 float train_left=1;
@@ -51,7 +64,8 @@ void setup() {
   
   Serial.begin(57600);
   Serial.println("Setup complete.");
-  
+
+  stepp.setSpeed(SPDBR);  
   // Rover initialization
   initialize_GPIO();
   systemwide_enable();
@@ -85,22 +99,32 @@ void executeBluetooth(char val) {
      train_right=1;
      break;
    case '5':
-   
+     arm_base_duty=max(-1, arm_base_duty-1);
+     arm_duty=0;
+     stepp.step(-STPBR);
      break;
   case '6':
-   
+     arm_base_duty=min(1, arm_base_duty+1);
+     stepp.step(STPBR);
+     arm_duty=0;
      break;  
    case 's':
-   
-     break;
-  case 't':
-   
-     break;  
-     
-   case 'x':
-   
+     arm_segment=max(0, arm_segment-1);
+     arm_duty=0;    
+     arm_base_duty=0; 
      break;
   case 'c':
+     arm_duty=min(1, arm_duty+1);
+     arm_base_duty=0;
+     break;  
+   case 't':
+     arm_duty=max(-1, arm_duty-1);
+     arm_base_duty=0;
+     break;
+  case 'x':
+     arm_segment=min(2, arm_segment+1);
+     arm_duty=0;
+     arm_base_duty=0;
      break;
  }  
  
@@ -118,12 +142,41 @@ void loop() {
   }
   
   if (changeFlag) {
+    arm_motor_duties(0,0,0);
+    //arm_base_rotate(arm_base_duty);
+    
+    
+    switch (arm_segment) {
+      case 0:
+        arm_motor_duties(arm_duty, 0, 0);
+        break;
+      case 1:
+        arm_motor_duties(0, arm_duty, 0);
+        break;
+      case 2:
+        arm_motor_duties(0, 0, arm_duty);
+        break;  
+    }
+    
+    
+    //arm_base_rotate(arm_base_duty);
+    
     drive_motor_duties(duty*train_right,duty*train_left,duty*train_left,duty*train_left,duty*train_right,duty*train_right);
     changeFlag--;   
-    Serial.println(); 
+    Serial.println();
+    Serial.println("Drive Train:"); 
     Serial.print("       Duty: "); Serial.println(duty);
     Serial.print(" Left Train: "); Serial.println(train_left);
     Serial.print("Right Train: "); Serial.println(train_right);
+    
+    Serial.println("Arm:");
+    
+    Serial.print("   Segment: ");
+    Serial.println(arm_segment);
+    Serial.print("      Duty: ");
+    Serial.println(arm_duty);
+    Serial.print(" Base Duty: ");
+    Serial.println(arm_base_duty);
   }
   
   nh.spinOnce();
