@@ -33,10 +33,6 @@ const Motor LRP = {lLRP, DRIVE, SLEEP6, LRP_DIR, LRP_PWM, 0, 0, 0};	// G2 - Left
 const Motor RFP = {lRFP, DRIVE, SLEEP6, RFP_DIR, RFP_PWM, 0, 0, 0};	// G2 - Right Front Power:	DIR P8.32 | PWM P8.34
 const Motor RMP = {lRMP, DRIVE, SLEEP6, RMP_DIR, RMP_PWM, 0, 0, 0};	// G2 - Right Middle Power:	DIR P8.38 | PWM P8.36
 const Motor RRP = {lRRP, DRIVE, SLEEP6, RRP_DIR, RRP_PWM, 0, 0, 0};	// G2 - Right Rear Power:	DIR P8.44 | PWM P8.46
-const Motor LFS = {lLFS, SWERVE, 0, 0, 0, 0, LFS_IN1, LFS_IN2};	// L2 - Left Front Steer: 	_IN1 P8.27 | _IN2 P8.29
-const Motor LRS = {lLRS, SWERVE, 0, 0, 0, 0, LRS_IN3, LRS_IN4};	// L2 - Left Rear Steer: 	_IN3 P8.39 | _IN4 P8.41
-const Motor RFS = {lRFS, SWERVE, 0, 0, 0, 0, RFS_IN1, RFS_IN2};	// L2 - Right Front Steer:	_IN1 P8.31 | _IN2 P8.37
-const Motor RRS = {lRRS, SWERVE, 0, 0, 0, 0, RRS_IN3, RRS_IN4};	// L2 - Right Rear Steer:	_IN3 P8.40 | _IN4 P8.42
 
 // Arm Linear Actuators with Pot Feedback
 const Motor BAS = {lBAS, ARM, 0, BAS_DIR, BAS_PUL, 0, 0, 0};	// MD - Base Linear Act:	DIR P9.28 | PWM P9.15
