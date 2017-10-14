@@ -184,14 +184,12 @@ int drive_enable(){
 	return 1;
 }
 
-void wheel_dir(Motor MOT, int in) {
-	MOT.REV=!in;
-	digitalWrite(MOT.DIR, in);
-	delay(5);
-}
-
 void wheel_pwm(Motor MOT, float duty) {
-	//if(duty<0) wheel_dir(MOT,0);
+	int DIR;
+	DIR=(duty >= 0) ? HIGH : LOW;
+
+	digitalWrite(MOT.DIR, DIR);
+	delay(5);
 	analogWrite(MOT.PULSE, abs(duty)*255);
 	delay(5);
 }
@@ -205,15 +203,6 @@ void drive_halt() {
 	delay(5);
 }
 
-void drive_allwheels_dir(int in) {
-	const Motor drive_motors[] = {LFP, LMP, LRP, RFP, RMP, RRP};
-	const int drive_motors_c = sizeof(drive_motors)/sizeof(drive_motors[0]);
-	int i=0;
-	for(i=0; i<drive_motors_c; i++) wheel_dir(drive_motors[i], in);
-	//cstate.REVERSE=!in;
-	delay(5);
-}
-
 void drive_motor_duties(float rf_d, float lf_d, float lm_d, float lr_d, float rr_d, float rm_d) {
 	wheel_pwm(LFP,lf_d);
 	wheel_pwm(LRP,rf_d);
@@ -222,134 +211,6 @@ void drive_motor_duties(float rf_d, float lf_d, float lm_d, float lr_d, float rr
 	wheel_pwm(RFP,lr_d);
 	wheel_pwm(RRP,rr_d);
 	delay(5);
-}
-
-/*
-void state_update() {
-	 cstate.bas_length=read_bas_length();
-	 cstate.elb_length=read_elb_length();
-	 cstate.for_length=read_for_length();
-	 cstate.base_theta=get_base_theta();
-	 cstate.LFS_theta=read_SWR(LFS);
-	 cstate.RFS_theta=read_SWR(RFS);
-	 cstate.LRS_theta=read_SWR(LRS);
-	 cstate.RRS_theta=read_SWR(RRS);
-}
-*/
-
-int run_DCM_PUL(Motor MOT, int STATE){
-	if (cstate.arm_state==ARMED && MOT.TYPE == ARM) {
-
-		int duty;
-		uint8_t DIR = LOW;
-
-		switch (STATE) {
-			case 1:
-				duty = HIGH;
-				DIR = LOW;
-				break;
-			case 0:
-				duty = LOW;
-				DIR = LOW;
-				break;
-			case -1:
-				duty = HIGH;
-				DIR = HIGH;
-				break;
-			default:
-				printf("State is 1, 0, -1 ONLY!!\n");
-				return -1;
-		}
-
-		digitalWrite(MOT.DIR, DIR);
-		delay(5);
-		digitalWrite(MOT.PULSE, duty);
-		delay(5);
-		return 0;
-	} else if (cstate.arm_state==ARMED &&
-		(MOT.TYPE == SWERVE || MOT.TYPE == CLAMP || MOT.TYPE == SAMPLE)) {
-
-		int A, B;
-
-		switch (STATE) {
-			case 1:
-				A = HIGH;
-				B = LOW;
-				break;
-			case 0:
-				A = LOW;
-				B = LOW;
-				break;
-			case -1:
-				A = LOW;
-				B = HIGH;
-				break;
-			default:
-				printf("State is 1, 0, -1 ONLY!!\n");
-				return -1;
-		}
-
-		digitalWrite(MOT.INA, A);
-		delay(5);
-		digitalWrite(MOT.INB, B);
-		delay(5);
-		return 0;
-	} else {
-		printf("Wrong motor nub or not armed, try again!\n");
-		return -1;
-	}
-}
-
-int run_DCM_PWM(Motor MOT, float duty){
-
-// check that the duty cycle is within +-1
-//	if(!(cstate.drive_state==ARMED && MOT.TYPE == DRIVE)) {
-//		printf("Wrong Motor Type or Not ARMED! -___-\n");
-//		return -1;
-//	}
-	uint8_t DIR = LOW;
-	int ss;
-	char ch;
-
-  duty = (duty>1.0) ? 1 : duty;
-	duty = (duty<-1.0) ? -1 : duty;
-	DIR = (duty>=0) ? HIGH : LOW;
-	if(DIR==LOW) duty=-duty;
-
-	switch (MOT.PULSE) {
-		case 22:
-			ss = 2;
-			ch = 'A';
-			break;
-		case 23:
-			ss = 2;
-			ch = 'B';
-			break;
-		case 50:
-			ss = 1;
-			ch = 'A';
-			break;
-		case 51:
-			ss = 1;
-			ch = 'B';
-			break;
-		case 2:
-			ss = 0;
-			ch = 'A';
-			break;
-		case 3:
-			ss = 0;
-			ch = 'B';
-			break;
-		default:
-			printf("Motor Pulse Pin is not correct :/ \n");
-			return -1;
-	}
-
-	digitalWrite(MOT.DIR, DIR);
-	delay(5);
-
-	return 0;
 }
 
 void print_state_message() {

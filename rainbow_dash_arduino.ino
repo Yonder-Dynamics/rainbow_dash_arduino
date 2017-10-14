@@ -4,7 +4,7 @@
 #include <std_msgs/Float32.h>
 #include <std_msgs/Float32MultiArray.h>
 #include <SoftwareSerial.h>
-
+#define COEF 0.5
 #define MAX_DUTY 0.5
 
 std_msgs::Float32MultiArray value;
@@ -14,13 +14,17 @@ ros::Publisher pubby("MEGA", &value);
 ros::NodeHandle nh;
 
 float theta;
+unsigned changeFlag;
+
+/* Speed */
 float duty=0;
+
 float lr=0;
 float ud=0;
 
-
-float v=0, head=0;
-char val;
+/** Coefficients of speed */
+float train_left=1;
+float train_right=1;
 
 void manualCallback(const std_msgs::Float32MultiArray& msg) { 
   
@@ -45,6 +49,7 @@ ros::Subscriber<std_msgs::Float32MultiArray> subby("manual_guidance", &manualCal
 void setup() {
   
   Serial.begin(57600);
+  Serial2.begin(9600);
   Serial.println("Setup complete.");
   
   // Rover initialization
@@ -59,56 +64,25 @@ void setup() {
   Serial2.begin(9600);
 } //setup
 
-void setv(int value) {
-   /* 
-  if(value==-1) {
-    while (v > 0) {
-      v-=0.1;
-      drive_motor_duties(v,v,v,v,v,v);
-      Serial.println(v);
-      delay(100);
-    }
-    v=0;
-    drive_motor_duties(v,v,v,v,v,v);
-
-    
-  }*/
-  if(value==1) {
-    while (v > -MAX_DUTY) {
-        v-=0.1;
-        drive_motor_duties(v,v,v,v,v,v);
-        Serial.println(v);
-        delay(100);   
-    }
-         
-    v=-MAX_DUTY;
-    drive_motor_duties(v,v,v,v,v,v);
-  } else if(value==-1) {
-    while (v < -0.1) {
-        v+=0.1;
-        drive_motor_duties(v,v,v,v,v,v);
-        Serial.println(v);
-        delay(100);   
-    }
-         
-    v=0;
-    drive_motor_duties(v,v,v,v,v,v);
-  }
-  
-} //setv
-
 void executeBluetooth(char val) {
  switch (val) {
    case 'l': // LEFT
+     train_left=max(train_left-0.5, 0.5);
+     train_right=min(train_right+0.5, 1);
      break;
   case 'u': // UP
-   
-     setv(1);
+     duty=min(MAX_DUTY, duty+MAX_DUTY); 
+     train_left=1;
+     train_right=1;
      break;
    case 'r': // RIGHT
+     train_right=max(train_right-0.5, 0.5);
+     train_left =min(train_left+0.5, 1);
      break;
   case 'd': // DOWN
-     setv(-1);
+     duty=max(-MAX_DUTY, duty-MAX_DUTY);
+     train_left=1;
+     train_right=1;
      break;
    case '5':
    
@@ -129,6 +103,8 @@ void executeBluetooth(char val) {
   case 'c':
      break;
  }  
+ 
+ changeFlag++;
 } // executeBluetooth
 
 void loop() {
@@ -136,9 +112,18 @@ void loop() {
   Serial2.flush();
   // Bluetooth  
   if (Serial2.available()) {
-    val=Serial2.read();
+    char val=Serial2.read();
     Serial.write(val);
     executeBluetooth(val);
+  }
+  
+  if (changeFlag) {
+    drive_motor_duties(duty*train_right,duty*train_left,duty*train_left,duty*train_left,duty*train_right,duty*train_right);
+    changeFlag--;   
+    Serial.println(); 
+    Serial.print("       Duty: "); Serial.println(duty);
+    Serial.print(" Left Train: "); Serial.println(train_left);
+    Serial.print("Right Train: "); Serial.println(train_right);
   }
   
   nh.spinOnce();
