@@ -1,5 +1,7 @@
 #include "Dash.h"
 
+current_state cstate;
+
 /* UTILITIES */
 float mapfun(float x, float inMIN, float inMAX, float outMIN, float outMAX) {
 	float val = (x - inMIN) * (outMAX - outMIN) / (inMAX - inMIN) + outMIN;
@@ -131,9 +133,10 @@ int systemwide_disable() {
 
 	delay(5);
 	drive_disable();
-	disable_arm();
-	disable_steppers();
+	//disable_arm();
+	//disable_steppers();
 	cstate.rover_state=DISARMED;
+  return DISARMED;
 }
 
 int systemwide_enable() {
@@ -149,7 +152,7 @@ int systemwide_enable() {
 
 int systemwide_reset() {
 	drive_reset();
-	arm_reset();
+	//arm_reset();
 	/*
 	arm_default_position();
 	drive_halt();
@@ -200,6 +203,15 @@ void drive_halt() {
 	int drive_motors_c = sizeof(drive_motors)/sizeof(drive_motors[0]);
 	int i=0;
 	for(i=0; i<drive_motors_c; i++) wheel_pwm(drive_motors[i], 0);
+	delay(5);
+}
+
+void drive_allwheels_dir(int in) {
+	const Motor drive_motors[] = {LFP, LMP, LRP, RFP, RMP, RRP};
+	const int drive_motors_c = sizeof(drive_motors)/sizeof(drive_motors[0]);
+	int i=0;
+	for(i=0; i<drive_motors_c; i++) wheel_dir(drive_motors[i], in);
+	//cstate.REVERSE=!in;
 	delay(5);
 }
 
