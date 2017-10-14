@@ -40,6 +40,7 @@ void manualCallback(const std_msgs::Float32MultiArray& msg) {
   pubby.publish(&value); 
 
   drive_motor_duties(duty,duty,duty,duty,duty,duty);
+  Serial.println(duty);
   delay(10);
 } //manualCallback
 
@@ -49,7 +50,6 @@ ros::Subscriber<std_msgs::Float32MultiArray> subby("manual_guidance", &manualCal
 void setup() {
   
   Serial.begin(57600);
-  Serial2.begin(9600);
   Serial.println("Setup complete.");
   
   // Rover initialization
@@ -67,8 +67,8 @@ void setup() {
 void executeBluetooth(char val) {
  switch (val) {
    case 'l': // LEFT
-     train_left=max(train_left-0.5, 0.5);
-     train_right=min(train_right+0.5, 1);
+     train_left=min(1, 3);
+     train_right=max(1, 3);
      break;
   case 'u': // UP
      duty=min(MAX_DUTY, duty+MAX_DUTY); 
@@ -76,8 +76,8 @@ void executeBluetooth(char val) {
      train_right=1;
      break;
    case 'r': // RIGHT
-     train_right=max(train_right-0.5, 0.5);
-     train_left =min(train_left+0.5, 1);
+     train_right=min(1, 3);
+     train_left =max(1, 3);
      break;
   case 'd': // DOWN
      duty=max(-MAX_DUTY, duty-MAX_DUTY);
