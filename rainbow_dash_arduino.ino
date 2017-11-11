@@ -6,7 +6,7 @@
 #include <SoftwareSerial.h>
 #include <Stepper.h>
 #define COEF 0.5
-#define MAX_DUTY 0.25
+#define MAX_DUTY 1
 
 std_msgs::Float32MultiArray value;
 
@@ -16,6 +16,8 @@ ros::NodeHandle nh;
 
 Stepper stepp(200, BR_DIR, BR_PUL);
 
+float train_high=0.75;
+float train_low =0.25;
 
 float theta;
 unsigned changeFlag;
@@ -81,8 +83,8 @@ void setup() {
 void executeBluetooth(char val) {
  switch (val) {
    case 'l': // LEFT
-     train_left=min(1, 3);
-     train_right=max(1, 3);
+     train_left=min(train_low, train_high);
+     train_right=max(train_low, train_high);
      break;
   case 'u': // UP
      duty=min(MAX_DUTY, duty+MAX_DUTY); 
@@ -90,8 +92,8 @@ void executeBluetooth(char val) {
      train_right=1;
      break;
    case 'r': // RIGHT
-     train_right=min(1, 3);
-     train_left =max(1, 3);
+     train_right=min(train_low, train_high);
+     train_left =max(train_low, train_high);
      break;
   case 'd': // DOWN
      duty=max(-MAX_DUTY, duty-MAX_DUTY);
